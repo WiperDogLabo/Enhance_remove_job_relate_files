@@ -78,6 +78,10 @@ if [ -f $resultJob ];then
 	echo "=> Failed to remove $resultJob"
 	exit
 fi
+
+echo "** Touch trigger file to fire job"
+touch $wiperdog_home/var/job/test.trg
+
 echo "** Waiting for 20 second and check again job & instance result ..."
 sleep 20
 if [ ! -f $resultInstance ];then
@@ -200,6 +204,9 @@ if [ -f $resultJob2 ];then
 	echo "=> Failed to remove $resultJob2"
 	exit
 fi
+
+echo "** Touch trigger file to fire job"
+touch $wiperdog_home/var/job/test.trg
 
 echo "** Waiting and check again job & instance result ..."
 sleep 30
