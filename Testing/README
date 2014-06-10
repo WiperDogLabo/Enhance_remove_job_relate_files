@@ -1,0 +1,7 @@
+Testing
+=====================
+This directory contains test script for enhance remove job relate file
+Usage :
+ 		- ./test_script.sh $WIPERDOG_HOME/PATH
+Example :
+ 		- ./test_removejob.sh /home/user/wiperdog-0.2.5-SNAPSHOT
