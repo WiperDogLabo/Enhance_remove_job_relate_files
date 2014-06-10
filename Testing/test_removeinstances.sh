@@ -13,10 +13,12 @@ else
 	#Start wiperdog
 	wiperdog_status=$(lsof -wni tcp:13111)
 	if [ "$wiperdog_status" == "" ];then
+		echo "starting wiperdog..."
 		#Check if wiperdog not running ,start it
 		/bin/sh $wiperdog_home/bin/startWiperdog.sh > /dev/null 2>&1 &
-		sleep 10
+		sleep 30
 	fi
+	echo "wiperdog running..."
 fi
 currentDir="$(cd "$(dirname "$0")" && pwd)"
 
