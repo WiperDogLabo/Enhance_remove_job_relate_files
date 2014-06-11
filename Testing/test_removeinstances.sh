@@ -10,15 +10,17 @@ else
 		echo "Wiperdog directory does not exists : $wiperdog_home"
 		exit
 	fi
+	rm -rf $wiperdog_home/var/job/* > /dev/null
+
 	#Start wiperdog
 	wiperdog_status=$(lsof -wni tcp:13111)
 	if [ "$wiperdog_status" == "" ];then
-		echo "starting wiperdog..."
+		echo "** Starting wiperdog..."
 		#Check if wiperdog not running ,start it
 		/bin/sh $wiperdog_home/bin/startWiperdog.sh > /dev/null 2>&1 &
-		sleep 30
+		sleep 60
 	fi
-	echo "wiperdog running..."
+	echo "** Wiperdog running..."
 fi
 currentDir="$(cd "$(dirname "$0")" && pwd)"
 
@@ -31,7 +33,6 @@ echo "*****   Start testcase 1 .."
 echo "** Clean wiperdog var/job and testcase directory before running testcase"
 resultJob=testRemoveInstances/result/testjob.txt
 resultInstance=testRemoveInstances/result/testjob_instance_1.txt
-rm -rf $wiperdog_home/var/job/* > /dev/null
 rm -rf $resultJob > /dev/null
 rm -rf $resultInstance > /dev/null
 
@@ -116,13 +117,13 @@ sleep 1
 
 echo "------CASE 2 :  "
 echo "1. Test object: Test for case remove multi instances running in wiperdog"
-echo "2. Input : Job file ,instances file: testjob.job ,testjob2.job,testjob.instances,testjob2.instances (embeed in this test script)"
+echo "2. Input : Job file ,instances file: testjob1.job ,testjob2.job,testjob1.instances,testjob2.instances (embeed in this test script)"
 echo "3. Expect Output : When remove instance ,instance stop running and no result data output in $currentDir/testRemoveInstances/result"
 echo "*****   Start testcase 2 .."
 echo "** Clean wiperdog var/job and testcase directory before running testcase"
-resultJob1=testRemoveInstances/result/testjob.txt
+resultJob1=testRemoveInstances/result/testjob1.txt
 resultJob2=testRemoveInstances/result/testjob2.txt
-resultInstance1=testRemoveInstances/result/testjob_instance_1.txt
+resultInstance1=testRemoveInstances/result/testjob1_instance_1.txt
 resultInstance2=testRemoveInstances/result/testjob2_instance_1.txt
 rm -rf $wiperdog_home/var/job/* > /dev/null
 rm -rf $resultJob1 > /dev/null
@@ -132,13 +133,13 @@ rm -rf $resultInstance2 > /dev/null
 
 sleep 1
 echo "** Copy job ,instance & trigger to wiperdog/var/job"
-cat > $wiperdog_home/var/job/testjob.job <<eof
-JOB = [name:"testjob"]
+cat > $wiperdog_home/var/job/testjob1.job <<eof
+JOB = [name:"testjob1"]
 FETCHACTION = {
 	return [a:"1",b:"2"]
 }
 DBTYPE = "@MYSQL"
-DEST = [[file:"$currentDir/testRemoveInstances/result/testjob.txt"]]
+DEST = [[file:"$currentDir/testRemoveInstances/result/testjob1.txt"]]
 eof
 cat > $wiperdog_home/var/job/testjob2.job <<eof
 JOB = [name:"testjob2"]
@@ -148,14 +149,14 @@ FETCHACTION = {
 DBTYPE = "@MYSQL"
 DEST = [[file:"$currentDir/testRemoveInstances/result/testjob2.txt"]]
 eof
-cat > $wiperdog_home/var/job/testjob.instances <<eof
+cat > $wiperdog_home/var/job/testjob1.instances <<eof
 [instance_1:[schedule:"10i"]]
 eof
 cat > $wiperdog_home/var/job/testjob2.instances <<eof
 [instance_1:[schedule:"10i"]]
 eof
 cat > $wiperdog_home/var/job/test.trg <<eof
-job: "testjob" ,schedule: "10i"
+job: "testjob1" ,schedule: "10i"
 job: "testjob2" ,schedule: "10i"
 
 eof
@@ -170,12 +171,12 @@ else
 	exit
 fi
 sleep 1
-echo "** Remove testjob.instances  & testjob2.instances and waiting for instances finish if running..."
-rm -rf $wiperdog_home/var/job/testjob.instances > /dev/null
+echo "** Remove testjob1.instances  & testjob2.instances and waiting for instances finish if running..."
+rm -rf $wiperdog_home/var/job/testjob1.instances > /dev/null
 rm -rf $wiperdog_home/var/job/testjob2.instances > /dev/null
 
-if [ -f $wiperdog_home/var/job/testjob.instances ];then
-	echo "=> Failed to remove instance : $wiperdog_home/var/job/testjob.instances" 
+if [ -f $wiperdog_home/var/job/testjob1.instances ];then
+	echo "=> Failed to remove instance : $wiperdog_home/var/job/testjob1.instances" 
 	exit
 fi
 if [ -f $wiperdog_home/var/job/testjob2.instances ];then
@@ -184,7 +185,7 @@ if [ -f $wiperdog_home/var/job/testjob2.instances ];then
 fi
 
 sleep 60
-echo "** Remove previous output from job & instances of testjob in $currentDir/testRemoveInstances/result"
+echo "** Remove previous output from job & instances of testjob1 in $currentDir/testRemoveInstances/result"
 rm -rf $resultInstance1 > /dev/null
 rm -rf $resultJob1 > /dev/null
 rm -rf $resultInstance2 > /dev/null
@@ -207,9 +208,6 @@ if [ -f $resultJob2 ];then
 	exit
 fi
 
-echo "** Touch trigger file to fire job"
-touch $wiperdog_home/var/job/test.trg
-
 echo "** Waiting and check again job & instance result ..."
 sleep 30
 if [ ! -f $resultInstance1 ] && [ ! -f $resultInstance2 ];then
@@ -225,8 +223,8 @@ else
 	echo "=> No job output ..NOT PASSED "	
 	exit
 fi
-echo "** Copy testjob.instances & testjob2.instances back to var/job "
-cat > $wiperdog_home/var/job/testjob.instances <<eof
+echo "** Copy testjob1.instances & testjob2.instances back to var/job "
+cat > $wiperdog_home/var/job/testjob1.instances <<eof
 [instance_1:[schedule:"5i"]]
 eof
 cat > $wiperdog_home/var/job/testjob2.instances <<eof
@@ -234,7 +232,7 @@ cat > $wiperdog_home/var/job/testjob2.instances <<eof
 eof
 echo "** Waiting for instances running..."
 sleep 40
-echo "** Check output of testjob instances to file in $resultInstance..."
+echo "** Check output of testjob1.instances & testjob2.instances  to file : ..."
 if  [ -f $resultInstance1 ] && [ -f $resultInstance2 ] ;then
 	echo "=> Instance output existed : PASSED !"
 else
