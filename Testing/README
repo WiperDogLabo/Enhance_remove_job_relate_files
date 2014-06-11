@@ -1,7 +1,11 @@
 Testing
 =====================
-This directory contains test script for enhance remove job relate file
+***This directory contains test script for enhance remove job relate file
 Usage :
  		- ./test_script.sh $WIPERDOG_HOME/PATH
 Example :
- 		- ./test_removejob.sh /home/user/wiperdog-0.2.5-SNAPSHOT
+ 		- ./test_removejob.sh /home/user/wiperdog-0.2.5-SNAPSHOT  
+ 		
+***Note: 
+  The source test need to check data output when job executed and therefore need to wait for wiperdog return data to file.
+  Sometime, wiperdog execute too long and testcase will be not pass. So, you can update sleep time more than in source test.  
